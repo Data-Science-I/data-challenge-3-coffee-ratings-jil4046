@@ -122,32 +122,33 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(<span class="fu">everything</span>(), <span class="sc">~</span> <span class="fu">replace_na</span>(<span class="fu">as.character</span>(.), <span class="st">"Missing"</span>)),</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">altitude_mean_meters =</span> <span class="fu">as.numeric</span>(altitude_mean_meters),</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">binned_mean_altitude =</span> <span class="fu">cut2</span>(altitude_mean_meters, <span class="at">g =</span> <span class="dv">4</span>),  <span class="co"># Automatically bins into 4 groups</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(aroma<span class="sc">:</span>moisture, as.numeric)</span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Function to calculate mean and standard deviation</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>calc_mean_sd <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  mean_val <span class="ot">&lt;-</span> <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  sd_val <span class="ot">&lt;-</span> <span class="fu">sd</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">"Mean:"</span>, <span class="fu">round</span>(mean_val, <span class="dv">2</span>), <span class="st">", SD:"</span>, <span class="fu">round</span>(sd_val, <span class="dv">2</span>))</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Use map to calculate tables for different groups</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(data, group_var) {</span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="sc">!!</span><span class="fu">sym</span>(group_var)) <span class="sc">%&gt;%</span></span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="fu">across</span>(aroma<span class="sc">:</span>moisture, calc_mean_sd), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">%&gt;%</span></span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="at">caption =</span> <span class="fu">paste</span>(<span class="st">"Summary by"</span>, group_var))</span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a><span class="co"># Define grouping variables</span></span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>group_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"species"</span>, <span class="st">"country_of_origin"</span>, <span class="st">"binned_mean_altitude"</span>)</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate summary tables using map</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>summary_tables <span class="ot">&lt;-</span> <span class="fu">map</span>(group_vars, <span class="sc">~</span> <span class="fu">summary_table</span>(coffee_ratings_cleaned, .x))</span>
-<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Display summary tables</span></span>
-<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a>summary_tables[[<span class="dv">1</span>]]  <span class="co"># Summary by species</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">binned_mean_altitude =</span> <span class="fu">replace_na</span>(<span class="fu">as.character</span>(binned_mean_altitude), <span class="st">"Missing"</span>),</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">across</span>(aroma<span class="sc">:</span>moisture, as.numeric)</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 2: Function to calculate mean and standard deviation</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>calc_mean_sd <span class="ot">&lt;-</span> <span class="cf">function</span>(x) {</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  mean_val <span class="ot">&lt;-</span> <span class="fu">mean</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  sd_val <span class="ot">&lt;-</span> <span class="fu">sd</span>(x, <span class="at">na.rm =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">paste</span>(<span class="st">"Mean:"</span>, <span class="fu">round</span>(mean_val, <span class="dv">2</span>), <span class="st">", SD:"</span>, <span class="fu">round</span>(sd_val, <span class="dv">2</span>))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Step 3: Use map to calculate tables for different groups</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>summary_table <span class="ot">&lt;-</span> <span class="cf">function</span>(data, group_var) {</span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  data <span class="sc">%&gt;%</span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(<span class="sc">!!</span><span class="fu">sym</span>(group_var)) <span class="sc">%&gt;%</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="fu">across</span>(aroma<span class="sc">:</span>moisture, calc_mean_sd), <span class="at">.groups =</span> <span class="st">'drop'</span>) <span class="sc">%&gt;%</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="fu">kable</span>(<span class="at">caption =</span> <span class="fu">paste</span>(<span class="st">"Summary by"</span>, group_var))</span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a><span class="co"># Define grouping variables</span></span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>group_vars <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="st">"species"</span>, <span class="st">"country_of_origin"</span>, <span class="st">"binned_mean_altitude"</span>)</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Calculate summary tables using map</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>summary_tables <span class="ot">&lt;-</span> <span class="fu">map</span>(group_vars, <span class="sc">~</span> <span class="fu">summary_table</span>(coffee_ratings_cleaned, .x))</span>
+<span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-34"><a href="#cb2-34" aria-hidden="true" tabindex="-1"></a><span class="co"># Display summary tables</span></span>
+<span id="cb2-35"><a href="#cb2-35" aria-hidden="true" tabindex="-1"></a>summary_tables[[<span class="dv">1</span>]]  <span class="co"># Summary by species</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <caption>Summary by species</caption>
@@ -805,6 +806,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
+<td style="text-align: left;">Missing</td>
+<td style="text-align: left;">Mean: 7.55 , SD: 0.35</td>
+<td style="text-align: left;">Mean: 7.52 , SD: 0.39</td>
+<td style="text-align: left;">Mean: 7.43 , SD: 0.4</td>
+<td style="text-align: left;">Mean: 7.57 , SD: 0.35</td>
+<td style="text-align: left;">Mean: 7.57 , SD: 0.38</td>
+<td style="text-align: left;">Mean: 7.58 , SD: 0.35</td>
+<td style="text-align: left;">Mean: 9.68 , SD: 0.67</td>
+<td style="text-align: left;">Mean: 9.76 , SD: 0.66</td>
+<td style="text-align: left;">Mean: 9.77 , SD: 0.68</td>
+<td style="text-align: left;">Mean: 7.57 , SD: 0.48</td>
+<td style="text-align: left;">Mean: 0.07 , SD: 0.06</td>
+</tr>
+<tr class="even">
 <td style="text-align: left;">[ 1, 1117)</td>
 <td style="text-align: left;">Mean: 7.5 , SD: 0.27</td>
 <td style="text-align: left;">Mean: 7.46 , SD: 0.31</td>
@@ -818,7 +833,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">Mean: 7.44 , SD: 0.43</td>
 <td style="text-align: left;">Mean: 0.09 , SD: 0.05</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">[1117, 1317)</td>
 <td style="text-align: left;">Mean: 7.55 , SD: 0.32</td>
 <td style="text-align: left;">Mean: 7.48 , SD: 0.34</td>
@@ -832,7 +847,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">Mean: 7.42 , SD: 0.43</td>
 <td style="text-align: left;">Mean: 0.1 , SD: 0.04</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td style="text-align: left;">[1317, 1600)</td>
 <td style="text-align: left;">Mean: 7.54 , SD: 0.55</td>
 <td style="text-align: left;">Mean: 7.49 , SD: 0.55</td>
@@ -846,7 +861,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">Mean: 7.44 , SD: 0.58</td>
 <td style="text-align: left;">Mean: 0.1 , SD: 0.04</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td style="text-align: left;">[1600,190164]</td>
 <td style="text-align: left;">Mean: 7.69 , SD: 0.3</td>
 <td style="text-align: left;">Mean: 7.65 , SD: 0.33</td>
@@ -859,20 +874,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: left;">Mean: 9.92 , SD: 0.35</td>
 <td style="text-align: left;">Mean: 7.66 , SD: 0.37</td>
 <td style="text-align: left;">Mean: 0.08 , SD: 0.05</td>
-</tr>
-<tr class="odd">
-<td style="text-align: left;">NA</td>
-<td style="text-align: left;">Mean: 7.55 , SD: 0.35</td>
-<td style="text-align: left;">Mean: 7.52 , SD: 0.39</td>
-<td style="text-align: left;">Mean: 7.43 , SD: 0.4</td>
-<td style="text-align: left;">Mean: 7.57 , SD: 0.35</td>
-<td style="text-align: left;">Mean: 7.57 , SD: 0.38</td>
-<td style="text-align: left;">Mean: 7.58 , SD: 0.35</td>
-<td style="text-align: left;">Mean: 9.68 , SD: 0.67</td>
-<td style="text-align: left;">Mean: 9.76 , SD: 0.66</td>
-<td style="text-align: left;">Mean: 9.77 , SD: 0.68</td>
-<td style="text-align: left;">Mean: 7.57 , SD: 0.48</td>
-<td style="text-align: left;">Mean: 0.07 , SD: 0.06</td>
 </tr>
 </tbody>
 </table>

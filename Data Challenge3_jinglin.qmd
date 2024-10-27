@@ -31,6 +31,7 @@ coffee_ratings_cleaned <- coffee_ratings %>%
     across(everything(), ~ replace_na(as.character(.), "Missing")),
     altitude_mean_meters = as.numeric(altitude_mean_meters),
     binned_mean_altitude = cut2(altitude_mean_meters, g = 4),  # Automatically bins into 4 groups
+    binned_mean_altitude = replace_na(as.character(binned_mean_altitude), "Missing"),
     across(aroma:moisture, as.numeric)
   )
 
@@ -64,8 +65,6 @@ summary_tables[[3]]  # Summary by binned mean altitude
 Problem2
 
 ```{r}
-
-
 
 # Function to remove outliers based on IQR
 remove_outliers <- function(data, var) {
