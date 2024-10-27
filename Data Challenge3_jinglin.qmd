@@ -11,8 +11,6 @@ knitr::opts_chunk$set(cache=TRUE, error=FALSE, message=FALSE, warning=FALSE,
 
 ```
 
-
-
 ```{r}
 # Load necessary libraries
 library(dplyr)
@@ -24,18 +22,17 @@ library(readr)
 library(ggplot2)
 ```
 
-
 ```{r}
 # Load coffee ratings data
 coffee_ratings <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
 
-# Step 1: Clean the data
 coffee_ratings_cleaned <- coffee_ratings %>%
-  mutate(across(everything(), ~ replace_na(as.character(.), "Missing"))) %>%
-  mutate(altitude_mean_meters = as.numeric(as.character(altitude_mean_meters))) %>%
-  mutate(binned_mean_altitude = cut2(altitude_mean_meters, g = 4, 
-                                      labels = c("Low", "Medium", "High", "Very High"))) %>%
-  mutate(across(c(aroma:moisture), as.numeric))  # Ensure aroma through moisture are numeric
+  mutate(
+    across(everything(), ~ replace_na(as.character(.), "Missing")),
+    altitude_mean_meters = as.numeric(altitude_mean_meters),
+    binned_mean_altitude = cut2(altitude_mean_meters, g = 4),  # Automatically bins into 4 groups
+    across(aroma:moisture, as.numeric)
+  )
 
 # Step 2: Function to calculate mean and standard deviation
 calc_mean_sd <- function(x) {
@@ -66,26 +63,45 @@ summary_tables[[3]]  # Summary by binned mean altitude
 
 Problem2
 
-
 ```{r}
 
-# Step 2: Define a function to create scatterplots
-create_scatterplot <- function(data, x_var, y_var, group_var) {
+
+
+# Function to remove outliers based on IQR
+remove_outliers <- function(data, var) {
+  q1 <- quantile(data[[var]], 0.25, na.rm = TRUE)
+  q3 <- quantile(data[[var]], 0.75, na.rm = TRUE)
+  iqr <- q3 - q1
+  data %>% filter(data[[var]] >= (q1 - 1.5 * iqr) & data[[var]] <= (q3 + 1.5 * iqr))
+}
+
+# Function to create scatter plot
+scatter_plot <- function(data, x_var, y_var, group_var) {
+  data <- remove_outliers(data, x_var) %>%
+          remove_outliers(y_var)  # Remove outliers for both x and y variables
   ggplot(data, aes_string(x = x_var, y = y_var, color = group_var)) +
     geom_jitter(alpha = 0.6, width = 0.2, height = 0.2) +
-    labs(title = paste(x_var, "vs", y_var, "colored by", group_var),
-         x = x_var,
-         y = y_var) +
+    labs(
+      title = paste(gsub("_", " ", x_var), "vs", gsub("_", " ", y_var), "colored by", gsub("_", " ", group_var)),
+      x = gsub("_", " ", x_var),
+      y = gsub("_", " ", y_var),
+      color = gsub("_", " ", group_var)
+    ) +
     theme_minimal()
 }
 
-# Step 3: Create the plots
-# 1. Aroma vs Flavor colored by Species
-plot1 <- create_scatterplot(coffee_ratings_cleaned, "aroma", "flavor", "species")
-print(plot1)
+# Define plot specifications as a tibble to use with pmap
+plot_specs <- tibble(
+  data = list(coffee_ratings_cleaned, coffee_ratings_cleaned),
+  x_var = c("aroma", "balance"),
+  y_var = c("flavor", "body"),
+  group_var = c("species", "binned_mean_altitude")
+)
 
-# 2. Balance vs Body colored by Binned Mean Altitude
-plot2 <- create_scatterplot(coffee_ratings_cleaned, "balance", "body", "binned_mean_altitude")
-print(plot2)
+# Generate and display plots using pmap
+plots <- pmap(plot_specs, scatter_plot)
+
+# Display each plot
+print(plots[[1]])  # Aroma vs Flavor colored by Species
+print(plots[[2]])  # Balance vs Body colored by Binned Mean Altitude
 ```
-
