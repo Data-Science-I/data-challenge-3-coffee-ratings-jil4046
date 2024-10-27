@@ -1,0 +1,91 @@
+---
+title: "Data Challenge 3"
+author: "Jing Lin"
+format: html
+editor: visual
+---
+
+```{r,echo=FALSE}
+knitr::opts_chunk$set(cache=TRUE, error=FALSE, message=FALSE, warning=FALSE,
+                      echo=T, tidy.opts=list(width.cutoff=60),tidy=TRUE)
+
+```
+
+
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(purrr)
+library(knitr)
+library(Hmisc)  # For cut2
+library(tidyr)  # For replace_na
+library(readr) 
+library(ggplot2)
+```
+
+
+```{r}
+# Load coffee ratings data
+coffee_ratings <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
+
+# Step 1: Clean the data
+coffee_ratings_cleaned <- coffee_ratings %>%
+  mutate(across(everything(), ~ replace_na(as.character(.), "Missing"))) %>%
+  mutate(altitude_mean_meters = as.numeric(as.character(altitude_mean_meters))) %>%
+  mutate(binned_mean_altitude = cut2(altitude_mean_meters, g = 4, 
+                                      labels = c("Low", "Medium", "High", "Very High"))) %>%
+  mutate(across(c(aroma:moisture), as.numeric))  # Ensure aroma through moisture are numeric
+
+# Step 2: Function to calculate mean and standard deviation
+calc_mean_sd <- function(x) {
+  mean_val <- mean(x, na.rm = TRUE)
+  sd_val <- sd(x, na.rm = TRUE)
+  paste("Mean:", round(mean_val, 2), ", SD:", round(sd_val, 2))
+}
+
+# Step 3: Use map to calculate tables for different groups
+summary_table <- function(data, group_var) {
+  data %>%
+    group_by(!!sym(group_var)) %>%
+    summarise(across(aroma:moisture, calc_mean_sd), .groups = 'drop') %>%
+    kable(caption = paste("Summary by", group_var))
+}
+
+# Define grouping variables
+group_vars <- c("species", "country_of_origin", "binned_mean_altitude")
+
+# Calculate summary tables using map
+summary_tables <- map(group_vars, ~ summary_table(coffee_ratings_cleaned, .x))
+
+# Display summary tables
+summary_tables[[1]]  # Summary by species
+summary_tables[[2]]  # Summary by country of origin
+summary_tables[[3]]  # Summary by binned mean altitude
+```
+
+Problem2
+
+
+```{r}
+
+# Step 2: Define a function to create scatterplots
+create_scatterplot <- function(data, x_var, y_var, group_var) {
+  ggplot(data, aes_string(x = x_var, y = y_var, color = group_var)) +
+    geom_jitter(alpha = 0.6, width = 0.2, height = 0.2) +
+    labs(title = paste(x_var, "vs", y_var, "colored by", group_var),
+         x = x_var,
+         y = y_var) +
+    theme_minimal()
+}
+
+# Step 3: Create the plots
+# 1. Aroma vs Flavor colored by Species
+plot1 <- create_scatterplot(coffee_ratings_cleaned, "aroma", "flavor", "species")
+print(plot1)
+
+# 2. Balance vs Body colored by Binned Mean Altitude
+plot2 <- create_scatterplot(coffee_ratings_cleaned, "balance", "body", "binned_mean_altitude")
+print(plot2)
+```
+
