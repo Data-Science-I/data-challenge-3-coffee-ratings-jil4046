@@ -26,23 +26,24 @@ library(ggplot2)
 # Load coffee ratings data
 coffee_ratings <- read.csv('https://raw.githubusercontent.com/rfordatascience/tidytuesday/master/data/2020/2020-07-07/coffee_ratings.csv')
 
+# Clean and transform data
 coffee_ratings_cleaned <- coffee_ratings %>%
   mutate(
     across(everything(), ~ replace_na(as.character(.), "Missing")),
-    altitude_mean_meters = as.numeric(altitude_mean_meters),
+    altitude_mean_meters = as.numeric(gsub("[^0-9.]", "", altitude_mean_meters)), # Remove non-numeric characters
     binned_mean_altitude = cut2(altitude_mean_meters, g = 4),  # Automatically bins into 4 groups
     binned_mean_altitude = replace_na(as.character(binned_mean_altitude), "Missing"),
     across(aroma:moisture, as.numeric)
   )
 
-# Step 2: Function to calculate mean and standard deviation
+# Function to calculate mean and standard deviation
 calc_mean_sd <- function(x) {
   mean_val <- mean(x, na.rm = TRUE)
   sd_val <- sd(x, na.rm = TRUE)
   paste("Mean:", round(mean_val, 2), ", SD:", round(sd_val, 2))
 }
 
-# Step 3: Use map to calculate tables for different groups
+# Function to create summary table by grouping variable
 summary_table <- function(data, group_var) {
   data %>%
     group_by(!!sym(group_var)) %>%
